@@ -1,50 +1,65 @@
 import { auth, db } from "./firebase.js";
 import { signInWithEmailAndPassword } from
 "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import {
-  collection, query, where, getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { collection, query, where, getDocs } from
+"https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { hashPassword } from "./utils.js";
 
 window.login = async () => {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
 
   if (!username || !password) {
-    alert("Please enter username and password");
+    alert("Enter username & password");
     return;
   }
 
-  try {
-    // 🔍 1. Find user by username
-    const q = query(
-      collection(db, "users"),
-      where("username", "==", username)
-    );
-    const snap = await getDocs(q);
+  // 🔍 Look up user by username
+  const q = query(
+    collection(db, "users"),
+    where("username", "==", username),
+    where("active", "==", true)
+  );
 
-    if (snap.empty) {
-      alert("User not found");
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    alert("User not found");
+    return;
+  }
+
+  const userDoc = snap.docs[0];
+  const user = userDoc.data();
+
+  // 🔐 ADMIN LOGIN (Firebase Auth)
+  if (user.role === "admin") {
+    if (!user.email) {
+      alert("Admin email not set");
       return;
     }
 
-    const userDoc = snap.docs[0].data();
-    const email = userDoc.email;
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        user.email,
+        password
+      );
+      location.href = "admin.html";
+    } catch {
+      alert("Invalid admin credentials");
+    }
+    return;
+  }
 
-    // 🔐 2. Sign in with REAL email
-    const cred = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+  // 👩‍🏫 TEACHER LOGIN (Firestore)
+  if (user.role === "teacher") {
+    const hash = await hashPassword(password);
+    if (hash !== user.passwordHash) {
+      alert("Invalid username or password");
+      return;
+    }
 
-    // 🚦 3. Check role
-    window.location.href =
-      userDoc.role === "admin"
-        ? "admin.html"
-        : "teacher.html";
-
-  } catch (err) {
-    console.error(err.code, err.message);
-    alert("Invalid username or password");
+    sessionStorage.setItem("teacherId", userDoc.id);
+    location.href = "teacher.html";
   }
 };

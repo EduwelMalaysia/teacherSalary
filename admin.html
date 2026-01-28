@@ -1,14 +1,28 @@
-<h2>Create User</h2>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 bg-gray-100">
 
-<input id="newUsername" placeholder="Username">
-<input id="newPassword" type="password" placeholder="Password">
+<h1 class="text-2xl font-bold mb-4">Admin Panel</h1>
 
-<select id="newRole">
-  <option value="teacher">Teacher</option>
-  <option value="admin">Admin</option>
-</select>
+<h2 class="font-semibold mb-2">Create Teacher</h2>
 
-<!-- Email only shown for admin -->
-<input id="newEmail" placeholder="Admin Email (admins only)">
+<input id="newUsername" placeholder="Username"
+  class="border p-2 mb-2 block">
 
-<button onclick="createUser()">Create</button>
+<input id="newPassword" type="password"
+  placeholder="Password"
+  class="border p-2 mb-2 block">
+
+<button onclick="createUser()"
+  class="bg-green-600 text-white px-4 py-2 rounded">
+  Create Teacher
+</button>
+
+<script type="module" src="./guard-admin.js"></script>
+<script type="module" src="./admin.js"></script>
+</body>
+</html>

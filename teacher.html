@@ -1,21 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Teacher</title>
+  <title>Teacher Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="p-6 bg-gray-100">
 
-<h1 class="text-2xl font-bold">Teacher Portal</h1>
+<body class="bg-gray-100 min-h-screen p-6">
 
-<p class="mt-4 text-green-600">
-  Logged in successfully
-</p>
+<!-- Header -->
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">Teacher Portal</h1>
+  <button onclick="logout()"
+    class="bg-black text-white px-4 py-2 rounded">
+    Logout
+  </button>
+</div>
 
-<button onclick="logout()"
-  class="mt-6 bg-black text-white px-4 py-2 rounded">
-  Logout
-</button>
+<!-- Profile -->
+<div class="bg-white p-4 rounded shadow mb-6">
+  <p>
+    <span class="font-semibold">Username:</span>
+    <span id="teacherName">-</span>
+  </p>
+</div>
+
+<!-- Class Slots -->
+<h2 class="text-xl font-semibold mb-3">My Classes</h2>
+<div id="classList" class="space-y-3"></div>
+
+<!-- Replacement Section -->
+<h2 class="text-xl font-semibold mt-8 mb-3">Replacement / Extra Class</h2>
+
+<div class="bg-white p-4 rounded shadow max-w-md">
+  <input id="repDate" type="date"
+    class="border p-2 w-full mb-2">
+
+  <select id="repDuration"
+    class="border p-2 w-full mb-2">
+    <option value="30">30 minutes</option>
+    <option value="60">1 hour</option>
+    <option value="90">1.5 hours</option>
+  </select>
+
+  <button onclick="submitReplacement()"
+    class="bg-green-600 text-white w-full py-2 rounded">
+    Submit Replacement
+  </button>
+</div>
 
 <script>
 function logout() {

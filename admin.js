@@ -14,27 +14,37 @@ import {
 // CREATE USER
 window.createUser = async () => {
   const username = newUsername.value.trim();
-  const email = newEmail.value.trim();   // 👈 NEW
   const password = newPassword.value;
   const role = newRole.value;
 
-  if (!username || !email || !password) {
-    alert("All fields required");
+  let email = "";
+
+  if (role === "admin") {
+    email = newEmail.value.trim();
+    if (!email) {
+      alert("Admin email required");
+      return;
+    }
+  } else {
+    // ✅ AUTO-GENERATED INTERNAL EMAIL (teacher never sees this)
+    email = `teacher_${username}@teachers.eduwel.internal`;
+  }
+
+  if (!username || !password) {
+    alert("Username and password required");
     return;
   }
 
   try {
-    // 1️⃣ Create Auth user with REAL email
     const cred = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
 
-    // 2️⃣ Store username → email mapping
     await setDoc(doc(db, "users", cred.user.uid), {
       username,
-      email,
+      email,           // stored but hidden
       role,
       active: true
     });
@@ -46,6 +56,8 @@ window.createUser = async () => {
     alert(err.message);
   }
 };
+
+
 // LOAD USERS
 async function loadUsers() {
   const snap = await getDocs(collection(db,"users"));

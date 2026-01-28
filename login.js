@@ -30,7 +30,7 @@ window.login = async () => {
       : "teacher.html";
 
   } catch (err) {
-    console.error(err);
-    alert("Invalid username or password");
+    console.error(err.code, err.message);
+    alert(err.code);
   }
 };

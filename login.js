@@ -1,8 +1,9 @@
 import { auth, db } from "./firebase.js";
 import { signInWithEmailAndPassword } from
 "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { doc, getDoc } from
-"https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+  collection, query, where, getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 window.login = async () => {
   const username = document.getElementById("username").value.trim();
@@ -13,24 +14,37 @@ window.login = async () => {
     return;
   }
 
-  const email = `${username}@eduwel.local`;
-
   try {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    const snap = await getDoc(doc(db, "users", cred.user.uid));
+    // 🔍 1. Find user by username
+    const q = query(
+      collection(db, "users"),
+      where("username", "==", username)
+    );
+    const snap = await getDocs(q);
 
-    if (!snap.exists()) {
-      alert("User profile not found");
+    if (snap.empty) {
+      alert("User not found");
       return;
     }
 
-    const role = snap.data().role;
-    window.location.href = role === "admin"
-      ? "admin.html"
-      : "teacher.html";
+    const userDoc = snap.docs[0].data();
+    const email = userDoc.email;
+
+    // 🔐 2. Sign in with REAL email
+    const cred = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    // 🚦 3. Check role
+    window.location.href =
+      userDoc.role === "admin"
+        ? "admin.html"
+        : "teacher.html";
 
   } catch (err) {
     console.error(err.code, err.message);
-    alert(err.code);
+    alert("Invalid username or password");
   }
 };

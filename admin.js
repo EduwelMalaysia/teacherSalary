@@ -14,29 +14,38 @@ import {
 // CREATE USER
 window.createUser = async () => {
   const username = newUsername.value.trim();
+  const email = newEmail.value.trim();   // 👈 NEW
   const password = newPassword.value;
   const role = newRole.value;
 
-  if (!username || !password) {
-    alert("Username and password required");
+  if (!username || !email || !password) {
+    alert("All fields required");
     return;
   }
 
-  const email = `${username}@eduwel.local`;
+  try {
+    // 1️⃣ Create Auth user with REAL email
+    const cred = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-  const cred = await createUserWithEmailAndPassword(
-    auth, email, password
-  );
+    // 2️⃣ Store username → email mapping
+    await setDoc(doc(db, "users", cred.user.uid), {
+      username,
+      email,
+      role,
+      active: true
+    });
 
-  await setDoc(doc(db,"users",cred.user.uid),{
-    username,
-    role,
-    active: true
-  });
+    alert("User created successfully");
 
-  alert("User created");
+  } catch (err) {
+    console.error(err.code, err.message);
+    alert(err.message);
+  }
 };
-
 // LOAD USERS
 async function loadUsers() {
   const snap = await getDocs(collection(db,"users"));
